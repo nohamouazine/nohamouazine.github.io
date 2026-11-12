@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Noham Ouazine</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 fill=%27%23000%27/%3E%3Ccircle cx=%275.2%27 cy=%278%27 r=%272.2%27 fill=%27none%27 stroke=%27%23fff%27 stroke-width=%271.5%27/%3E%3Ccircle cx=%2710.8%27 cy=%278%27 r=%272.2%27 fill=%27none%27 stroke=%27%23fff%27 stroke-width=%271.5%27/%3E%3C/svg%3E">
+<meta name="description" content="Noham Ouazine, 16. A language model first, now a neuron on a chip.">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #000;
+  --white: #f3f1ec;
+  --grey: #8d8b86;
+  --rule: #2b2b2b;
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --pad: clamp(1.1rem, 3.6vw, 3.2rem);
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; background: var(--black); }
+body { margin: 0; background: var(--black); color: var(--white); font-family: var(--sans); font-size: 1rem; line-height: 1.5; }
+main, .bar { max-width: 90rem; margin-inline: auto; }
+a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 0.08em; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--white); outline-offset: 4px; }
+::selection { background: var(--white); color: var(--black); }
+.big { font-weight: 700; font-variation-settings: "wdth" 112; letter-spacing: -0.02em; line-height: 1; }
+
+.bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20; mix-blend-mode: difference; color: #fff;
+  display: flex; justify-content: space-between; align-items: center; padding: 1rem var(--pad);
+  font-weight: 500; font-size: 0.9rem;
+}
+.past .bar { mix-blend-mode: normal; background: var(--black); border-bottom: 1px solid var(--rule); }
+.lang { display: flex; gap: 0.9rem; }
+.lang button { font: inherit; color: inherit; background: none; border: 0; padding: 0.2rem 0; cursor: pointer; opacity: 0.5; }
+.lang button[aria-pressed="true"] { opacity: 1; box-shadow: 0 2px 0 currentColor; }
+
+/* hero: the robot stays on stage while the page scrolls past */
+.hero { height: 250vh; position: relative; }
+.stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+#klein { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.9s; }
+.ready #klein { opacity: 1; }
+.shot { position: absolute; inset: 0; padding: var(--pad); display: flex; flex-direction: column; justify-content: flex-end; }
+.one { z-index: 1; opacity: var(--a, 1); }
+.two { z-index: 3; opacity: var(--b, 0); pointer-events: none; }
+h1 { margin: 0; font-size: clamp(2.5rem, 5.2vw, 5.25rem); line-height: 0.98; }
+h1 span { display: block; overflow: hidden; padding-bottom: 0.06em; }
+h1 i { display: block; font-style: normal; animation: up 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+h1 span + span i { animation-delay: 0.09s; }
+@keyframes up { from { transform: translateY(105%); } }
+.intro { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem 3rem; margin-top: clamp(1rem, 2.4vw, 2rem); }
+.lead { margin: 0; font-size: clamp(1.05rem, 1.35vw, 1.3rem); font-weight: 500; line-height: 1.35; max-width: 26ch; color: var(--grey); }
+.tag { margin: 0; max-width: 30ch; text-align: right; font-size: 0.95rem; color: var(--grey); position: relative; z-index: 3; }
+.tag b { display: block; font-size: 1rem; color: var(--white); }
+.two h2 { margin: 0; font-size: clamp(1.9rem, 3.4vw, 3.4rem); max-width: 10ch; }
+.two p { margin: 1rem 0 0; max-width: 34ch; font-size: 1.05rem; color: var(--grey); }
+.pin { position: absolute; left: 0; top: 0; z-index: 4; opacity: var(--b, 0); pointer-events: none; font-size: 0.82rem; font-weight: 500; white-space: nowrap; padding-left: 3.2rem; line-height: 1; margin-top: -0.5em; }
+.pin > span { background: var(--black); padding: 0.25em 0.5em; border-radius: 99px; }
+.pin::before { content: ""; position: absolute; left: 0.5rem; top: 50%; width: 2.3rem; height: 1px; background: currentColor; }
+.pin::after { content: ""; position: absolute; left: 0; top: 50%; width: 7px; height: 7px; margin-top: -3px; border-radius: 50%; background: currentColor; }
+
+/* sheets */
+.sheet { padding: clamp(3.5rem, 8vw, 7rem) var(--pad); position: relative; z-index: 5; background: var(--black); border-top: 1px solid var(--rule);
+  display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: 1.5rem clamp(1.5rem, 4vw, 4rem); align-items: start; }
+.sheet > * { min-width: 0; }
+.sheet > :not(h2) { grid-column: 2; }
+.sheet > h2 { margin: 0; font-size: clamp(1.35rem, 1.9vw, 1.75rem); max-width: 12ch; line-height: 1.1; position: sticky; top: 4.5rem; }
+
+.work { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--rule); }
+.work li {
+  display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr) minmax(0, 3fr); gap: 0.5rem 2rem; align-items: baseline;
+  border-top: 1px solid var(--rule); padding: 1.35rem 0.9rem;
+  transition: background 0.25s, color 0.25s, padding 0.25s;
+}
+.work li:hover { background: var(--white); color: var(--black); padding-left: 1.5rem; }
+.work h3 { margin: 0; font-size: clamp(1.3rem, 1.8vw, 1.65rem); }
+.work p { margin: 0; max-width: 40ch; color: var(--grey); }
+.work li:hover p { color: inherit; }
+.work .more { margin-top: 0.5rem; font-weight: 600; color: var(--white); }
+.work li:hover .more { color: inherit; }
+.work .state { justify-self: end; text-align: right; font-weight: 500; font-size: 0.9rem; color: var(--grey); }
+.work li:hover .state { color: inherit; }
+.work .state.on { color: var(--white); }
+
+.neuron { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.5rem, 3vw, 3rem); align-items: start; }
+.neuron p { margin: 0 0 1rem; max-width: 42ch; color: var(--grey); }
+pre {
+  margin: 2rem 0 0; padding: 0; overflow-x: auto; font-family: var(--mono); font-size: 0.8rem; line-height: 1.65; tab-size: 2;
+  font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; color: var(--white);
+}
+pre .k { color: var(--grey); }
+.scope { border: 1px solid var(--rule); }
+#trace { display: block; width: 100%; height: clamp(200px, 22vw, 300px); cursor: pointer; touch-action: manipulation; }
+.readout { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.6rem; padding: 0.8rem 1rem; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 0.85rem; color: var(--grey); }
+.readout b { font-weight: 600; color: var(--white); }
+.go { margin-left: auto; font: 600 0.9rem var(--sans); background: var(--white); color: var(--black); border: 0; border-radius: 99px; padding: 0.55rem 1.1rem; cursor: pointer; transition: transform 0.15s; }
+.go:hover { transform: scale(1.05); }
+.go:active { transform: scale(0.95); }
+
+.path { margin: 0; border-bottom: 1px solid var(--rule); }
+.path div { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: 0.3rem 2rem; border-top: 1px solid var(--rule); padding: 1.05rem 0; align-items: baseline; }
+.path dt { font-weight: 500; font-size: 0.95rem; color: var(--grey); }
+.path dd { margin: 0; font-size: 1.1rem; font-weight: 500; line-height: 1.35; max-width: 44ch; }
+.facts { margin: 2.5rem 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 1.5rem 2rem; }
+.facts dt { font-size: 0.9rem; color: var(--grey); }
+.facts dd { margin: 0.15rem 0 0; font-weight: 500; }
+
+.reach { list-style: none; margin: 0; padding: 0; }
+.reach { border-bottom: 1px solid var(--rule); }
+.reach li { border-top: 1px solid var(--rule); }
+.reach a { display: block; padding: 1rem 0; text-decoration: none; font-size: clamp(1.3rem, 1.8vw, 1.65rem); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.2s; }
+.reach a:hover { transform: translateX(0.6rem); color: var(--grey); }
+
+footer { margin-top: 2.5rem; font-size: 0.85rem; color: var(--grey); }
+
+[data-lang="fr"] [lang="en"], [data-lang="en"] [lang="fr"] { display: none; }
+
+@media (max-width: 820px) {
+  .tag { text-align: left; }
+  .sheet { grid-template-columns: minmax(0, 1fr); }
+  .sheet > :not(h2) { grid-column: 1; }
+  .sheet > h2 { position: static; max-width: none; margin-bottom: 0.5rem; }
+  .work li { grid-template-columns: minmax(0, 1fr); }
+  .work .state { justify-self: start; text-align: left; }
+  .neuron, .path div { grid-template-columns: minmax(0, 1fr); }
+  .pin { font-size: 0.78rem; padding-left: 2.2rem; }
+  .pin::before { width: 1.4rem; }
+}
+@media (prefers-reduced-motion: reduce) { h1 i { animation: none; } }
+</style>
+</head>
+<body data-lang="en">
+
+<header class="bar">
+  <span>Noham Ouazine</span>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" data-set="en" aria-pressed="true">EN</button>
+    <button type="button" data-set="fr" aria-pressed="false">FR</button>
+  </div>
+</header>
+
+<main>
+  <div class="hero" id="hero">
+    <div class="stage" id="stage">
+      <canvas id="klein" aria-hidden="true"></canvas>
+
+      <div class="shot one">
+        <h1 class="big" aria-label="Noham Ouazine"><span aria-hidden="true"><i>Noham</i></span><span aria-hidden="true"><i>Ouazine</i></span></h1>
+        <div class="intro">
+          <p class="lead">
+            <span lang="en">I'm 16. I build brains for machines.</span>
+            <span lang="fr">J'ai 16 ans. Je construis des cerveaux pour les machines.</span>
+          </p>
+          <p class="tag">
+            <b>Klein</b>
+            <span lang="en">My desk robot, 16 cm tall. Drawn, not built yet. It follows your cursor.</span>
+            <span lang="fr">Mon robot de bureau, 16 cm de haut. Dessiné, pas encore construit. Il suit ton curseur.</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="shot two">
+        <h2 class="big"><span lang="en">Six printed parts.</span><span lang="fr">Six pièces imprimées.</span></h2>
+        <p>
+          <span lang="en">A language model first, now a neuron on a chip. The goal is a small brain that a robot like this one can carry on a battery.</span>
+          <span lang="fr">D'abord un modèle de langue, maintenant un neurone sur une puce. Le but : un petit cerveau qu'un robot comme celui-ci peut porter sur batterie.</span>
+        </p>
+      </div>
+
+      <span class="pin" data-pin="tete"><span lang="en">Head</span><span lang="fr">Tête</span></span>
+      <span class="pin" data-pin="oeil"><span lang="en">Eye and camera</span><span lang="fr">Œil et caméra</span></span>
+      <span class="pin" data-pin="corps"><span lang="en">Body, electronics</span><span lang="fr">Corps, électronique</span></span>
+      <span class="pin" data-pin="base"><span lang="en">Turning base</span><span lang="fr">Base tournante</span></span>
+    </div>
+  </div>
+
+  <section class="sheet">
+    <h2 class="big"><span lang="en">What I'm building</span><span lang="fr">Ce que je construis</span></h2>
+    <ul class="work">
+      <li>
+        <h3 class="big">Vertigo 3</h3>
+        <div>
+          <p>
+            <span lang="en">A small language model that answers in French. 98 MB, runs in a browser tab, shows its source.</span>
+            <span lang="fr">Un petit modèle de langue qui répond en français. 98 Mo, il tourne dans un onglet de navigateur et montre sa source.</span>
+          </p>
+          <p class="more">
+            <a href="https://huggingface.co/spaces/nohamouazine/vertigo-3-demo"><span lang="en">Try it in your browser</span><span lang="fr">L'essayer dans le navigateur</span></a>,
+            <a href="https://github.com/nohamouazine/vertigo"><span lang="en">read the code</span><span lang="fr">lire le code</span></a>
+          </p>
+        </div>
+        <span class="state on"><span lang="en">Public</span><span lang="fr">Public</span></span>
+      </li>
+      <li>
+        <h3 class="big">Vertigo 4</h3>
+        <p>
+          <span lang="en">The next version, four times larger, learning to hold a conversation and to write code.</span>
+          <span lang="fr">La version suivante, quatre fois plus grande, qui apprend à tenir une conversation et à écrire du code.</span>
+        </p>
+        <span class="state"><span lang="en">In training</span><span lang="fr">En entraînement</span></span>
+      </li>
+      <li>
+        <h3 class="big"><span lang="en">Neuron</span><span lang="fr">Neurone</span></h3>
+        <p>
+          <span lang="en">One spiking neuron in Verilog, on a Tiny Tapeout tile, through Hack Club's chip program.</span>
+          <span lang="fr">Un neurone à impulsions en Verilog, sur une tuile Tiny Tapeout, avec le programme de puces de Hack Club.</span>
+        </p>
+        <span class="state"><span lang="en">In design</span><span lang="fr">En conception</span></span>
+      </li>
+      <li>
+        <h3 class="big">Klein</h3>
+        <p>
+          <span lang="en">The desk robot at the top of this page. It will carry the brain.</span>
+          <span lang="fr">Le robot de bureau en haut de cette page. Il portera le cerveau.</span>
+        </p>
+        <span class="state"><span lang="en">Drawn, not built</span><span lang="fr">Dessiné, pas construit</span></span>
+      </li>
+    </ul>
+  </section>
+
+  <section class="sheet">
+    <h2 class="big"><span lang="en">One neuron, live</span><span lang="fr">Un neurone, en direct</span></h2>
+    <div class="neuron">
+      <div>
+        <p>
+          <span lang="en">This is the neuron I'm building for a real chip. Each pulse adds to its potential. It leaks a little all the time, and it fires when it passes the threshold.</span>
+          <span lang="fr">Voici le neurone que je construis pour une vraie puce. Chaque signal s'ajoute à son potentiel. Il fuit un peu en permanence, et il s'active quand il dépasse le seuil.</span>
+        </p>
+        <p>
+          <span lang="en">Verilog is the first language I learned to write by hand. This block is the part that adds up.</span>
+          <span lang="fr">Le Verilog est le premier langage que j'ai appris à écrire à la main. Ce bloc est la partie qui additionne.</span>
+        </p>
+<pre><span class="k">module</span> accumule (
+  <span class="k">input  wire</span>       clk,
+  <span class="k">input  wire</span>       rst,
+  <span class="k">input  wire</span>       entree,
+  <span class="k">input  wire</span> [5:0] poids,
+  <span class="k">output reg</span>  [7:0] potentiel
+);
+
+<span class="k">always</span> @(<span class="k">posedge</span> clk) <span class="k">begin</span>
+  <span class="k">if</span> (rst)
+    potentiel &lt;= 0;
+  <span class="k">else if</span> (entree)
+    potentiel &lt;= <span class="h">potentiel + poids</span>;
+<span class="k">end</span>
+
+<span class="k">endmodule</span></pre>
+      </div>
+      <div class="scope">
+        <canvas id="trace" role="img" aria-label="Live trace of a neuron's potential"></canvas>
+        <div class="readout">
+          <span><span lang="en">potential</span><span lang="fr">potentiel</span> <b id="pot">000</b></span>
+          <span><span lang="en">threshold</span><span lang="fr">seuil</span> <b>100</b></span>
+          <span class="hot"><span lang="en">spikes</span><span lang="fr">impulsions</span> <b id="count">0</b></span>
+          <button type="button" class="go" id="pulse"><span lang="en">Send a pulse</span><span lang="fr">Envoyer un signal</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet">
+    <h2 class="big"><span lang="en">How I got here</span><span lang="fr">Comment j'en suis arrivé là</span></h2>
+    <dl class="path">
+      <div><dt><span lang="en">Age 13</span><span lang="fr">À 13 ans</span></dt>
+        <dd><span lang="en">First small websites, then my own game.</span><span lang="fr">Premiers petits sites web, puis mon propre jeu.</span></dd></div>
+      <div><dt><span lang="en">September 2026</span><span lang="fr">Septembre 2026</span></dt>
+        <dd><span lang="en">Started an AI project with a friend I met online.</span><span lang="fr">Début d'un projet d'IA avec un ami rencontré en ligne.</span></dd></div>
+      <div><dt><span lang="en">October 2026</span><span lang="fr">Octobre 2026</span></dt>
+        <dd><span lang="en">First models trained at home, on a gaming PC.</span><span lang="fr">Premiers modèles entraînés chez moi, sur un PC de jeu.</span></dd></div>
+      <div><dt><span lang="en">November 2026</span><span lang="fr">Novembre 2026</span></dt>
+        <dd><span lang="en">Vertigo 3 goes public. First lines of Verilog.</span><span lang="fr">Vertigo 3 devient public. Premières lignes de Verilog.</span></dd></div>
+      <div><dt><span lang="en">Next</span><span lang="fr">Ensuite</span></dt>
+        <dd><span lang="en">Send the neuron to be made. Build Klein. Then a network of neurons.</span><span lang="fr">Envoyer le neurone en fabrication. Construire Klein. Puis un réseau de neurones.</span></dd></div>
+    </dl>
+    <dl class="facts">
+      <div><dt><span lang="en">Based in</span><span lang="fr">Où</span></dt><dd>Touraine, France</dd></div>
+      <div><dt><span lang="en">School</span><span lang="fr">École</span></dt><dd><span lang="en">10th grade, remote</span><span lang="fr">Seconde, à distance</span></dd></div>
+      <div><dt><span lang="en">Languages</span><span lang="fr">Langues</span></dt><dd><span lang="en">French, English</span><span lang="fr">Français, anglais</span></dd></div>
+      <div><dt><span lang="en">Hardware</span><span lang="fr">Matériel</span></dt><dd><span lang="en">One gaming PC and free cloud GPUs</span><span lang="fr">Un PC de jeu et des GPU gratuits dans le cloud</span></dd></div>
+      <div><dt><span lang="en">Learning now</span><span lang="fr">J'apprends</span></dt><dd><span lang="en">Verilog, then Python</span><span lang="fr">Le Verilog, puis le Python</span></dd></div>
+    </dl>
+  </section>
+
+  <section class="sheet">
+    <h2 class="big"><span lang="en">Find me</span><span lang="fr">Me trouver</span></h2>
+    <ul class="reach">
+      <li><a class="big" href="https://github.com/nohamouazine">GitHub</a></li>
+      <li><a class="big" href="https://x.com/nohamouazine">X</a></li>
+      <li><a class="big" href="https://huggingface.co/nohamouazine">Hugging Face</a></li>
+      <li class="mail"><a class="big" href="mailto:noham@weareparis.eu">noham@weareparis.eu</a></li>
+    </ul>
+    <footer>
+      <span lang="en">Noham Ouazine. Last revised November 2026.</span>
+      <span lang="fr">Noham Ouazine. Dernière révision : novembre 2026.</span>
+    </footer>
+  </section>
+</main>
+
+<script>
+(function () {
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches, body = document.body;
+
+  var btns = document.querySelectorAll('.lang button');
+  function setLang(l) {
+    body.dataset.lang = l; document.documentElement.lang = l;
+    btns.forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.set === l ? 'true' : 'false'); });
+    try { localStorage.setItem('lang', l); } catch (e) {}
+  }
+  var saved = null; try { saved = localStorage.getItem('lang'); } catch (e) {}
+  setLang(saved || ((navigator.language || 'en').slice(0, 2) === 'fr' ? 'fr' : 'en'));
+  btns.forEach(function (x) { x.addEventListener('click', function () { setLang(x.dataset.set); }); });
+
+  // how far the hero has been scrolled: 0 at the top, 1 when the robot is fully apart
+  var hero = document.getElementById('hero');
+  function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function ease(a, b, v) { var t = clamp((v - a) / (b - a)); return t * t * (3 - 2 * t); }
+  window.kleinProgress = 0;
+  function onScroll() {
+    var r = hero.getBoundingClientRect(), p = clamp(-r.top / (r.height - window.innerHeight));
+    window.kleinProgress = p;
+    body.classList.toggle('past', p >= 1);
+    hero.style.setProperty('--a', (1 - ease(0.02, 0.22, p)).toFixed(3));
+    hero.style.setProperty('--b', ease(0.55, 0.8, p).toFixed(3));
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  // one neuron on the scope: the Verilog rule, plus the leak and the spike
+  var cv = document.getElementById('trace'), ctx = cv.getContext('2d');
+  var potEl = document.getElementById('pot'), countEl = document.getElementById('count');
+  var SEUIL = 100, POIDS = 35, MAX = 140, pot = 0, spikes = 0, hist = [], marks = [], t = 0, W = 0, H = 0;
+
+  function size() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); draw();
+  }
+  function y(v) { return H - 18 - (v / MAX) * (H - 36); }
+  function pulse() {
+    pot += POIDS;
+    if (pot >= SEUIL) { marks.push(t); pot = 0; spikes++; countEl.textContent = spikes; }
+    if (still) { hist.push(pot); t++; draw(); }
+  }
+  function tick() {
+    if (t % 4 === 0) pot -= pot >> 4;
+    if (pot < 2) pot = 0;
+    if (!still && Math.random() < 0.03) pulse();
+    hist.push(pot); t++;
+    var n = Math.ceil(W / 2);
+    if (hist.length > n) hist.splice(0, hist.length - n);
+    potEl.textContent = ('00' + pot).slice(-3);
+  }
+  function past() {
+    var n = Math.ceil(W / 2), plan = { 30: 1, 62: 1, 70: 1, 120: 1, 131: 1, 140: 1, 190: 1, 232: 1, 240: 1, 247: 1 };
+    for (var i = 0; i < n; i++) { if (plan[i - (n - 290)]) pulse(); tick(); }
+    spikes = 0; countEl.textContent = 0;
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(243,241,236,0.09)';
+    for (var gx = W % 40; gx < W; gx += 40) { ctx.beginPath(); ctx.moveTo(gx + .5, 0); ctx.lineTo(gx + .5, H); ctx.stroke(); }
+    for (var gv = 0; gv <= MAX; gv += 20) { ctx.beginPath(); ctx.moveTo(0, y(gv) + .5); ctx.lineTo(W, y(gv) + .5); ctx.stroke(); }
+    ctx.strokeStyle = '#8d8b86'; ctx.setLineDash([6, 6]);
+    ctx.beginPath(); ctx.moveTo(0, y(SEUIL)); ctx.lineTo(W, y(SEUIL)); ctx.stroke(); ctx.setLineDash([]);
+    var n = hist.length, x0 = W - n * 2, first = t - n;
+    ctx.strokeStyle = '#f3f1ec'; ctx.lineWidth = 1;
+    marks = marks.filter(function (m) { return m >= first; });
+    marks.forEach(function (m) { var x = x0 + (m - first) * 2; ctx.beginPath(); ctx.moveTo(x, y(MAX)); ctx.lineTo(x, y(0)); ctx.stroke(); });
+    ctx.strokeStyle = '#f3f1ec'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    for (var i = 0; i < n; i++) { var px = x0 + i * 2, py = y(hist[i]); if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py); }
+    ctx.stroke();
+  }
+  var last = 0;
+  function frame(now) { if (now - last > 33) { last = now; tick(); draw(); } requestAnimationFrame(frame); }
+  document.getElementById('pulse').addEventListener('click', pulse);
+  cv.addEventListener('click', pulse);
+  window.addEventListener('resize', size);
+  size();
+  if (still) { [0, 0, 35, 33, 31, 66, 62, 97, 0, 0, 35, 33].forEach(function (v) { hist.push(v); t++; }); potEl.textContent = '033'; draw(); }
+  else { past(); draw(); requestAnimationFrame(frame); }
+})();
+</script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const stage = document.getElementById('stage'), cv = document.getElementById('klein');
+const renderer = new THREE.WebGLRenderer({ canvas: cv, alpha: true, antialias: true });
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+
+const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(24, 1, 0.05, 10);
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.38;
+const key = new THREE.DirectionalLight(0xffffff, 1.7);
+key.position.set(0.25, 0.55, 0.45); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 7; key.shadow.bias = -0.0004;
+Object.assign(key.shadow.camera, { left: -0.25, right: 0.25, top: 0.3, bottom: -0.15, near: 0.1, far: 2 });
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xffffff, 1.4); rim.position.set(-0.5, 0.3, -0.4); scene.add(rim);
+
+const rig = new THREE.Group(); scene.add(rig);
+
+let W = 1, H = 1, narrow = false;
+function size() {
+  W = stage.clientWidth; H = stage.clientHeight; narrow = W < 820;
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.setSize(W, H, false);
+  cam.aspect = W / H; cam.updateProjectionMatrix();
+}
+addEventListener('resize', size); size();
+
+// pointer, measured from where the robot stands on screen
+let px = 0, py = 0, nodKick = 0;
+addEventListener('pointermove', e => {
+  px = (e.clientX - W * (narrow ? 0.5 : 0.68)) / (W * 0.5);
+  py = (e.clientY - H * (narrow ? 0.3 : 0.42)) / (H * 0.5);
+}, { passive: true });
+stage.addEventListener('pointerdown', () => { nodKick = performance.now(); });
+
+const pins = [...document.querySelectorAll('.pin')];
+let parts = null, pan, nod, eyes = [], anchors = {};
+
+new GLTFLoader().load('klein.glb', gltf => {
+  const root = gltf.scene; rig.add(root); root.updateMatrixWorld(true);
+  const P = n => root.getObjectByName(n), holder = P('mobi_robot');
+  root.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; if (o.material.name === 'oeil') o.material.envMapIntensity = 0.12; } });
+
+  // the two servos of the design: the body turns on the base, the head nods on the hub
+  pan = new THREE.Group(); pan.position.set(7, 0, 0); holder.add(pan);
+  nod = new THREE.Group(); nod.position.set(0, 113.95, 0); pan.add(nod);
+  holder.updateMatrixWorld(true);
+  ['corps_glb', 'couvercle_arriere_glb', 'hub_glb'].forEach(n => pan.attach(P(n)));
+  ['tete_glb', 'couvercle_tete_glb', 'iris_0_glb', 'iris_1_glb', 'lentille_glb', 'verre_0_glb', 'verre_1_glb'].forEach(n => nod.attach(P(n)));
+  eyes = [P('iris_0_glb'), P('iris_1_glb')];
+
+  // where each part goes when the robot comes apart, in millimetres
+  const away = {
+    tete_glb: [0, 46, 0], couvercle_tete_glb: [0, 46, -52],
+    verre_0_glb: [0, 46, 26], verre_1_glb: [0, 46, 26], iris_0_glb: [0, 46, 44], iris_1_glb: [0, 46, 44], lentille_glb: [0, 46, 62],
+    couvercle_arriere_glb: [0, 0, -58], base_glb: [0, -30, 0], fond_base_glb: [0, -56, 0]
+  };
+  parts = Object.keys(away).map(n => ({ o: P(n), from: P(n).position.clone(), by: new THREE.Vector3(...away[n]) }));
+
+  const mark = (name, obj) => {
+    const c = new THREE.Box3().setFromObject(obj).getCenter(new THREE.Vector3());
+    const a = new THREE.Object3D(); obj.add(a); a.position.copy(obj.worldToLocal(c)); anchors[name] = a;
+  };
+  mark('tete', P('tete_glb')); mark('oeil', P('iris_1_glb')); mark('corps', P('corps_glb')); mark('base', P('base_glb'));
+
+  document.body.classList.add('ready');
+  if (still) draw(0);
+});
+
+const v = new THREE.Vector3();
+let yaw = 0, pitch = 0, nextBlink = 2500, seen = true;
+new IntersectionObserver(e => { seen = e[0].isIntersecting; }).observe(stage);
+
+function draw(now) {
+  const p = window.kleinProgress || 0;
+  let e = Math.min(1, Math.max(0, (p - 0.12) / 0.6)); e = e * e * (3 - 2 * e);
+  const look = 1 - e;
+
+  rig.position.set(narrow ? -0.035 * e : 0.105 + 0.02 * e, narrow ? 0.06 - 0.03 * e : -0.005, 0);
+  rig.rotation.y = -0.42 - 0.5 * e + (still ? 0 : Math.sin(now / 2600) * 0.03 * look);
+  const dist = (narrow ? 1.12 : 0.72) + (narrow ? 0.5 : 0.36) * e;
+  cam.position.set(0, 0.115 + 0.05 * e, dist); cam.lookAt(0, 0.078 - 0.01 * e, 0);
+
+  if (parts) {
+    yaw += ((Math.max(-1.2, Math.min(1.2, px)) * 0.75 + 0.42) * look - yaw) * 0.07;
+    let aim = Math.max(-1, Math.min(1, py)) * 0.24;
+    const k = (now - nodKick) / 1000;
+    if (nodKick && k < 0.7) aim += Math.sin(k * Math.PI * 4) * 0.2 * (1 - k / 0.7);
+    pitch += (aim * look - pitch) * 0.1;
+    pan.rotation.y = yaw; nod.rotation.x = pitch;
+    for (const q of parts) q.o.position.copy(q.from).addScaledVector(q.by, e);
+
+    if (now > nextBlink) nextBlink = now + 2200 + Math.random() * 3800;
+    const shut = nextBlink - now < 130 ? 0.1 : 1;
+    eyes.forEach(i => { i.scale.z += (shut - i.scale.z) * 0.5; });
+
+    rig.updateMatrixWorld(true); cam.updateMatrixWorld(true);
+    for (const el of pins) {
+      anchors[el.dataset.pin].getWorldPosition(v).project(cam);
+      el.style.transform = `translate(${((v.x * 0.5 + 0.5) * W).toFixed(1)}px, ${((-v.y * 0.5 + 0.5) * H).toFixed(1)}px)`;
+    }
+  }
+  renderer.render(scene, cam);
+}
+function loop(now) { if (seen && !document.hidden) draw(now); requestAnimationFrame(loop); }
+if (still) { draw(0); addEventListener('scroll', () => draw(0), { passive: true }); }
+else requestAnimationFrame(loop);
+</script>
+</body>
+</html>
