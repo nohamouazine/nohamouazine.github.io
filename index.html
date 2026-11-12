@@ -39,7 +39,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--white); outline
 .lang button { font: inherit; color: inherit; background: none; border: 0; padding: 0.2rem 0; cursor: pointer; opacity: 0.5; }
 .lang button[aria-pressed="true"] { opacity: 1; box-shadow: 0 2px 0 currentColor; }
 
-/* hero: the robot stays on stage while the page scrolls past */
 .hero { height: 250vh; position: relative; }
 .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 #klein { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.9s; }
@@ -63,7 +62,6 @@ h1 span + span i { animation-delay: 0.09s; }
 .pin::before { content: ""; position: absolute; left: 0.5rem; top: 50%; width: 2.3rem; height: 1px; background: currentColor; }
 .pin::after { content: ""; position: absolute; left: 0; top: 50%; width: 7px; height: 7px; margin-top: -3px; border-radius: 50%; background: currentColor; }
 
-/* sheets */
 .sheet { padding: clamp(3.5rem, 8vw, 7rem) var(--pad); position: relative; z-index: 5; background: var(--black); border-top: 1px solid var(--rule);
   display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: 1.5rem clamp(1.5rem, 4vw, 4rem); align-items: start; }
 .sheet > * { min-width: 0; }
@@ -315,7 +313,6 @@ footer { margin-top: 2.5rem; font-size: 0.85rem; color: var(--grey); }
   setLang(saved || ((navigator.language || 'en').slice(0, 2) === 'fr' ? 'fr' : 'en'));
   btns.forEach(function (x) { x.addEventListener('click', function () { setLang(x.dataset.set); }); });
 
-  // how far the hero has been scrolled: 0 at the top, 1 when the robot is fully apart
   var hero = document.getElementById('hero');
   function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
   function ease(a, b, v) { var t = clamp((v - a) / (b - a)); return t * t * (3 - 2 * t); }
@@ -331,7 +328,6 @@ footer { margin-top: 2.5rem; font-size: 0.85rem; color: var(--grey); }
   window.addEventListener('resize', onScroll);
   onScroll();
 
-  // one neuron on the scope: the Verilog rule, plus the leak and the spike
   var cv = document.getElementById('trace'), ctx = cv.getContext('2d');
   var potEl = document.getElementById('pot'), countEl = document.getElementById('count');
   var SEUIL = 100, POIDS = 35, MAX = 140, pot = 0, spikes = 0, hist = [], marks = [], t = 0, W = 0, H = 0;
@@ -427,7 +423,6 @@ function size() {
 }
 addEventListener('resize', size); size();
 
-// pointer, measured from where the robot stands on screen
 let px = 0, py = 0, nodKick = 0;
 addEventListener('pointermove', e => {
   px = (e.clientX - W * (narrow ? 0.5 : 0.68)) / (W * 0.5);
@@ -443,7 +438,6 @@ new GLTFLoader().load('klein.glb', gltf => {
   const P = n => root.getObjectByName(n), holder = P('mobi_robot');
   root.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; if (o.material.name === 'oeil') o.material.envMapIntensity = 0.12; } });
 
-  // the two servos of the design: the body turns on the base, the head nods on the hub
   pan = new THREE.Group(); pan.position.set(7, 0, 0); holder.add(pan);
   nod = new THREE.Group(); nod.position.set(0, 113.95, 0); pan.add(nod);
   holder.updateMatrixWorld(true);
@@ -451,7 +445,6 @@ new GLTFLoader().load('klein.glb', gltf => {
   ['tete_glb', 'couvercle_tete_glb', 'iris_0_glb', 'iris_1_glb', 'lentille_glb', 'verre_0_glb', 'verre_1_glb'].forEach(n => nod.attach(P(n)));
   eyes = [P('iris_0_glb'), P('iris_1_glb')];
 
-  // where each part goes when the robot comes apart, in millimetres
   const away = {
     tete_glb: [0, 46, 0], couvercle_tete_glb: [0, 46, -52],
     verre_0_glb: [0, 46, 26], verre_1_glb: [0, 46, 26], iris_0_glb: [0, 46, 44], iris_1_glb: [0, 46, 44], lentille_glb: [0, 46, 62],
