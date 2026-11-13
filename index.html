@@ -487,12 +487,15 @@ new GLTFLoader().load('klein.glb', gltf => {
 });
 
 const v = new THREE.Vector3();
-let yaw = 0, pitch = 0, nextBlink = 2500, seen = true;
+let yaw = 0, pitch = 0, nextBlink = 2500, seen = true, pe = 0, lastT = 0;
 new IntersectionObserver(e => { seen = e[0].isIntersecting; }).observe(stage);
 
 function draw(now) {
   const p = window.kleinProgress || 0;
-  let e = Math.min(1, Math.max(0, (p - 0.08) / 0.5)); e = e * e * (3 - 2 * e);
+  const dt = Math.min(0.05, Math.max(0.001, (now - lastT) / 1000)); lastT = now;
+  const glide = r => 1 - Math.exp(-dt * r);
+  pe = still ? p : pe + (p - pe) * glide(11);
+  let e = Math.min(1, Math.max(0, (pe - 0.08) / 0.5)); e = e * e * (3 - 2 * e);
   const look = 1 - e;
 
   rig.position.set(narrow ? -0.02 * e : 0.105 + 0.02 * e, narrow ? 0 : -0.005, 0);
@@ -502,29 +505,28 @@ function draw(now) {
 
   if (parts) {
     const idle = now - mouseAt > 4000, gx = idle ? Math.sin(now / 3100) * 0.5 - 0.15 : px, gy = idle ? Math.sin(now / 4700) * 0.3 : py;
-    yaw += ((Math.max(-1.2, Math.min(1.2, gx)) * 0.75 + 0.42) * look - yaw) * 0.07;
+    yaw += ((Math.max(-1.2, Math.min(1.2, gx)) * 0.75 + 0.42) * look - yaw) * glide(4.4);
     let aim = Math.max(-1, Math.min(1, gy)) * 0.24;
     const k = (now - nodKick) / 1000;
     if (nodKick && k < 0.7) aim += Math.sin(k * Math.PI * 4) * 0.2 * (1 - k / 0.7);
-    pitch += (aim * look - pitch) * 0.1;
+    pitch += (aim * look - pitch) * glide(6.4);
     pan.rotation.y = yaw; nod.rotation.x = pitch;
     for (const q of parts) q.o.position.copy(q.from).addScaledVector(q.by, e);
 
     if (now > nextBlink) nextBlink = now + 2200 + Math.random() * 3800;
     const shut = nextBlink - now < 130 ? 0.1 : 1;
-    eyes.forEach(i => { i.scale.z += (shut - i.scale.z) * 0.5; });
+    eyes.forEach(i => { i.scale.z += (shut - i.scale.z) * glide(42); });
 
     rig.updateMatrixWorld(true); cam.updateMatrixWorld(true);
     for (const el of pins) {
       anchors[el.dataset.pin].getWorldPosition(v).project(cam);
-      el.style.transform = `translate(${((v.x * 0.5 + 0.5) * W).toFixed(1)}px, ${((-v.y * 0.5 + 0.5) * H).toFixed(1)}px)`;
+      el.style.transform = `translate3d(${((v.x * 0.5 + 0.5) * W).toFixed(1)}px, ${((-v.y * 0.5 + 0.5) * H).toFixed(1)}px, 0)`;
     }
   }
   renderer.render(scene, cam);
 }
-let shown = 0;
 function loop(now) {
-  if (seen && !document.hidden && (!lite || now - shown > 30)) { shown = now; draw(now); }
+  if (seen && !document.hidden) draw(now);
   requestAnimationFrame(loop);
 }
 if (still) { draw(0); addEventListener('scroll', () => draw(0), { passive: true }); }
